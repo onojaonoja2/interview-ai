@@ -1,6 +1,7 @@
 export async function POST(request: Request) {
   try {
-    const { jobTitle } = await request.json();
+    const body = await request.json().catch(() => ({}));
+    const { jobTitle } = body;
 
     if (!jobTitle || typeof jobTitle !== "string") {
       return Response.json({ error: "Job title is required" }, { status: 400 });
@@ -36,8 +37,8 @@ export async function POST(request: Request) {
     const data = await res.json();
     const text: string = data.choices?.[0]?.message?.content ?? "";
 
-    const cleaned = text.replace(/```json?/gi, "").replace(/```/g, "").trim();
-    const questions = JSON.parse(cleaned);
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    const questions = JSON.parse(jsonMatch ? jsonMatch[0] : text);
 
     if (!Array.isArray(questions) || questions.length === 0) {
       throw new Error("Invalid response format");
@@ -45,9 +46,7 @@ export async function POST(request: Request) {
 
     return Response.json({ questions });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Failed to generate questions";
     console.error("Failed to generate questions:", error);
-    return Response.json({ error: message }, { status: 500 });
+    return Response.json({ error: "Failed to generate questions" }, { status: 500 });
   }
 }
