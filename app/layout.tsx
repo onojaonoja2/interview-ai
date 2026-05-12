@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Interview Question Generator",
   description: "AI-powered interview question generator for any role",
+  icons: { icon: "/ai-interview-favicon.png" },
 };
 
 export default function RootLayout({
